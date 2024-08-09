@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+    <title>Product Go</title>
+</head>
+
+<body>
+    <!-- Navbar Start-->
+    <nav class="navbar navbar-expand-lg bg-dark">
+        <div class="container">
+            <a class="navbar-brand text-light" href="/">Rull Shop</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active text-light" href="/product">Product</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="/category">Category</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- Navbar End-->
+
+    <div class="container mt-3">
+        <div class="row d-flex justify-content-center">
+            <div class="col-lg-4">
+                <h1>Detail Product</h1>
+                <hr>
+
+                <form action="/product/create" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="name" value="{{ .product.Name }}" placeholder="Input Product Name"
+                            autocomplete="off" disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Catgeory</label>
+                        <input type="text" class="form-control" name="category_id" value="{{ .product.Category.Name }}" placeholder="Input Product Name"
+                            autocomplete="off" disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Stock</label>
+                        <input type="number" class="form-control" value="{{ .product.Stock }}" name="stock" placeholder="Input Stock"
+                            autocomplete="off" disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" rows="3" disabled>{{ .product.Description }}</textarea>
+                    </div>
+
+                    <div class="float-end">
+                        <a href="/product" class="btn btn-warning">Back</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
