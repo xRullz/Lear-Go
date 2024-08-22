@@ -1,12 +1,12 @@
 package controller
 
 import (
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 	"go-fiber-gorm/database"
 	"go-fiber-gorm/models/entity"
 	"go-fiber-gorm/models/request"
 	"log"
-
-	"github.com/gofiber/fiber/v2"
 )
 
 func GetAll(ctx *fiber.Ctx) error {
@@ -28,11 +28,20 @@ func Create(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	validate := validator.New()
+	errvalidate := validate.Struct(user)
+	if errvalidate != nil {
+		return ctx.Status(400).JSON(fiber.Map{
+			"message": "Failed",
+			"error":   errvalidate.Error(),
+		})
+	}
+
 	newUser := entity.User{
-		Name: user.Name,
-		Email: user.Email,
+		Name:    user.Name,
+		Email:   user.Email,
 		Address: user.Address,
-		Phone: user.Phone,
+		Phone:   user.Phone,
 	}
 
 	errCreateUser := database.DB.Create(&newUser).Error
@@ -45,6 +54,98 @@ func Create(ctx *fiber.Ctx) error {
 
 	return ctx.JSON(fiber.Map{
 		"message": "Success",
-		"data": newUser,
+		"data":    newUser,
+	})
+}
+
+func Detail(ctx *fiber.Ctx) error {
+	userId := ctx.Params("id")
+
+	var user entity.User
+	err := database.DB.First(&user, "id = ?", userId).Error
+	if err != nil {
+		return ctx.Status(404).JSON(fiber.Map{
+			"message": "user not found",
+		})
+	}
+
+	return ctx.JSON(fiber.Map{
+		"message": "success",
+		"data":    user,
+	})
+}
+
+func Update(ctx *fiber.Ctx) error {
+	userRequest := new(request.UserUpdateRequest)
+	if err := ctx.BodyParser(userRequest); err != nil {
+		return ctx.Status(404).JSON(fiber.Map{
+			"message": "bad request",
+		})
+	}
+
+	var user entity.User
+	var isEmailUserExist entity.User
+
+	userId := ctx.Params("id")
+
+	//Check User
+	err := database.DB.First(&user, "id = ?", userId).Error
+	if err != nil {
+		return ctx.Status(404).JSON(fiber.Map{
+			"message": "user not found",
+		})
+	}
+
+	//Check Email
+	errCheckEmail := database.DB.First(&isEmailUserExist, "email = ?", userRequest.Email).Error
+	if errCheckEmail == nil {
+		return ctx.Status(402).JSON(fiber.Map{
+			"message": "email already used.",
+		})
+	}
+
+	//Update User
+	if userRequest.Name != "" {
+		user.Name = userRequest.Name
+	}
+	user.Address = userRequest.Address
+	user.Phone = userRequest.Phone
+	user.Email = userRequest.Email
+
+	errUpdate := database.DB.Save(&user).Error
+	if errUpdate != nil {
+		return ctx.Status(500).JSON(fiber.Map{
+			"message": "internal server error",
+		})
+	}
+
+	return ctx.JSON(fiber.Map{
+		"message": "success",
+		"data":    user,
+	})
+}
+
+func Delete(ctx *fiber.Ctx) error {
+	userId := ctx.Params("id")
+
+	var user entity.User
+
+	//Check User
+	err := database.DB.First(&user, "id = ?", userId).Error
+	if err != nil {
+		return ctx.Status(404).JSON(fiber.Map{
+			"message": "user not found",
+		})
+	}
+
+	errDelete := database.DB.Delete(&user).Error
+	if errDelete != nil {
+		return ctx.Status(500).JSON(fiber.Map{
+			"message": "internal server error.",
+		})
+	}
+
+	return ctx.JSON(fiber.Map{
+		"message": "user deleted.",
 	})
 }
