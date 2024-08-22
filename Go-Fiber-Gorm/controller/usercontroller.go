@@ -1,12 +1,14 @@
 package controller
 
 import (
-	"github.com/go-playground/validator/v10"
-	"github.com/gofiber/fiber/v2"
 	"go-fiber-gorm/database"
+	"go-fiber-gorm/helpers"
 	"go-fiber-gorm/models/entity"
 	"go-fiber-gorm/models/request"
 	"log"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/gofiber/fiber/v2"
 )
 
 func GetAll(ctx *fiber.Ctx) error {
@@ -43,6 +45,16 @@ func Create(ctx *fiber.Ctx) error {
 		Address: user.Address,
 		Phone:   user.Phone,
 	}
+
+	hashPass, err := helpers.HashingPassword(user.Password)
+	if err != nil {
+		log.Println(err)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "internal server error",
+		})
+	}
+
+	newUser.Password = hashPass
 
 	errCreateUser := database.DB.Create(&newUser).Error
 
@@ -111,6 +123,7 @@ func Update(ctx *fiber.Ctx) error {
 	user.Address = userRequest.Address
 	user.Phone = userRequest.Phone
 	user.Email = userRequest.Email
+	user.Password = userRequest.Password
 
 	errUpdate := database.DB.Save(&user).Error
 	if errUpdate != nil {
